@@ -1,12 +1,11 @@
 package cfscrape
 
 import (
-	"bytes"
-	"os/exec"
-	"strings"
+	"github.com/robertkrimen/otto"
 )
 
 var NodeExecutor = JSExecutorFunc(NodeExecute)
+var vm = otto.New()
 
 // A JSExecutor executes a javascript expression, and returns the resulting
 // string. Note that the javascript that it must execute can be arbitrary.
@@ -23,16 +22,9 @@ func (f JSExecutorFunc) ExecuteJS(s string) (string, error) {
 // Executes a javascript expression with node. This executor makes no security
 // guarantees.
 func NodeExecute(javascript string) (string, error) {
-	var stdout bytes.Buffer
-
-	cmd := exec.Command("node", "-p")
-	cmd.Stdin = strings.NewReader(javascript)
-	cmd.Stdout = &stdout
-
-	err := cmd.Run()
+	result, err := vm.Run(javascript)
 	if err != nil {
 		return "", err
 	}
-
-	return stdout.String(), nil
+	return result.String(), nil
 }
