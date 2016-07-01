@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 )
 
@@ -148,11 +147,14 @@ func getChallengeSolution(resp *http.Response, executor JSExecutor) (*http.Reque
 }
 
 func IsCloudflareChallenge(resp *http.Response) bool {
-	refresh := resp.Header.Get("Refresh")
+	// Cloudflare no longer sends a "Refresh" header to normal user-agents
+	// like firefox/chrome. Interestingly enough, the "refresh" header still
+	// appears when using curl. Obviously we want to avoid consuming the
+	// response body, so we will just rely on the status code / server
+	// fingerprint to determine whether a cloudflare challenge is served.
 	server := resp.Header.Get("Server")
 
 	return resp.StatusCode == http.StatusServiceUnavailable &&
-		strings.Contains(refresh, "URL=/cdn-cgi/") &&
 		server == "cloudflare-nginx"
 }
 
