@@ -158,7 +158,15 @@ func IsCloudflareChallenge(resp *http.Response) bool {
 		server == "cloudflare-nginx"
 }
 
-var DefaultClient = &http.Client{Transport: NewRoundTripper(nil)}
+var DefaultClient *http.Client
+
+func init() {
+	transport := NewRoundTripper(nil)
+	DefaultClient = &http.Client{
+		Transport: transport,
+		Jar:       transport.(*cfRoundTripper).cloudflarejar,
+	}
+}
 
 func Get(url string) (resp *http.Response, err error) {
 	return DefaultClient.Get(url)
