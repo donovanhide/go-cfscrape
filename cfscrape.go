@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 )
 
@@ -155,7 +156,7 @@ func IsCloudflareChallenge(resp *http.Response) bool {
 	server := resp.Header.Get("Server")
 
 	return resp.StatusCode == http.StatusServiceUnavailable &&
-		server == "cloudflare-nginx"
+		strings.HasPrefix(server, "cloudflare")
 }
 
 var DefaultClient *http.Client
